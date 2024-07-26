@@ -1,11 +1,11 @@
 "use strict";
 
-import {Character} from "./class/Character/Character.js";
-import {BackgroundParallax} from "./class/Image/BackgroundParallax.js";
-import {Sound} from "./class/Sound/Sound.js";
-import {Ground} from "./class/Object/Ground.js";
-import {Enemy} from "./class/Character/Enemy.js";
-import {Text} from "./class/Text/Text.js";
+import { Character } from "./src/class/Character/Character.js";
+import { BackgroundParallax } from "./src/class/Image/BackgroundParallax.js";
+import { Sound } from "./src/class/Sound/Sound.js";
+import { Ground } from "./src/class/Object/Ground.js";
+import { Enemy } from "./src/class/Character/Enemy.js";
+import { Text } from "./src/class/Text/Text.js";
 
 const CANVAS = document.getElementById("gameScreen");
 const CONTEXT = CANVAS.getContext("2d");
@@ -48,10 +48,10 @@ const staggerFrames = 5;
 const playerSprite = new Image();
 playerSprite.src = '../assets/images/tiny_cat/kitty.png';
 
-const CharacterAnimationStateList = [{name: 'idle_right', frames: 8}, {
+const CharacterAnimationStateList = [{ name: 'idle_right', frames: 8 }, {
     name: 'walk_right',
     frames: 4
-}, {name: 'jump_up_right', frames: 2}, {name: 'fall_down_right', frames: 2},];
+}, { name: 'jump_up_right', frames: 2 }, { name: 'fall_down_right', frames: 2 },];
 
 let AnimationStateIndex = 0;
 
@@ -85,11 +85,11 @@ let ParallaxBackgroundLayers = [{
     layer: ParallaxBackgroundLayer6,
     speedX: 1,
     speedY: 0
-}, {layer: ParallaxBackgroundLayer5, speedX: 1, speedY: 0}, {
+}, { layer: ParallaxBackgroundLayer5, speedX: 1, speedY: 0 }, {
     layer: ParallaxBackgroundLayer4,
     speedX: 2,
     speedY: 0
-}, {layer: ParallaxBackgroundLayer3, speedX: 3, speedY: 0}, {layer: ParallaxBackgroundLayer1, speedX: 3, speedY: 0},]
+}, { layer: ParallaxBackgroundLayer3, speedX: 3, speedY: 0 }, { layer: ParallaxBackgroundLayer1, speedX: 3, speedY: 0 },]
 
 let EnemiesList = [];
 
