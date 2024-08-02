@@ -1,8 +1,9 @@
-import {Actor} from "../Actor/Actor.js"
+import { Actor } from "../Actor/Actor.js"
 
 export class Enemy extends Actor {
-    constructor(canvas, width, height, xLocation, yLocation) {
+    constructor(canvas, width, height, xLocation, yLocation, moveSpeed) {
         super(canvas, width, height, xLocation, yLocation)
+        this.moveSpeed = moveSpeed;
     }
 
     InitAnimation(enemySprite, spriteWidth, spriteHeight, spriteXDiff, spriteYDiff, imageWidth, imageHeight) {

@@ -35,7 +35,6 @@ window.addEventListener("keyup", function (e) {
 
 let testEnemy;
 
-
 const IMAGE_SCALE = 3;
 const IMAGE_WIDTH = 256 / IMAGE_SCALE;
 const IMAGE_HEIGHT = 256 / IMAGE_SCALE;
@@ -102,14 +101,23 @@ let BuffItemList = [];
 let totalScore = 0;
 let scoreText;
 
+const bgm = new Sound('assets/sounds/bgm.mp3', true);
+
+document.getElementById("startBtn").addEventListener("click", () => {
+    document.getElementById("startBtn").style.display = "none";
+    document.getElementById("mainMenu").style.display = "none";
+    bgm.Play();
+    BeginPlay();
+})
+
+
 function BeginPlay() {
     gameCharacter = new Character(CANVAS, 32, 32, 30, 696);
     gameCharacter.InitAnimation(playerSprite, SPRITE_WIDTH, SPRITE_HEIGHT, SPRITE_X_DIFF, SPRITE_Y_DIFF, IMAGE_WIDTH, IMAGE_HEIGHT);
     gameCharacter.bEnableGravity = true;
     gameCharacter.HeightDiff = 22;
     gameCharacter.bDisPlayCollision = false;
-    const bgm = new Sound('assets/sounds/bgm.mp3', true);
-    // bgm.Play();
+
     scoreText = new Text(CANVAS, 0, 0, 100, 100, " blue", "Consolas", "60px");
     EventTick();
 }
@@ -150,7 +158,7 @@ function EventTick() {
 
         if (EachSecondsFromStart(Math.trunc(Math.random() * 3))) {
             const randomPos = Math.trunc(Math.random() * 200);
-            const newEnemy = new Enemy(CANVAS, 40, 30, 1000 + randomPos, 698);
+            const newEnemy = new Enemy(CANVAS, 40, 30, 1000 + randomPos, 698, (5 + Math.trunc(Math.random() * 5)));
             newEnemy.animationIndex = 0;
             newEnemy.InitAnimation(enemySprite, 128, 128, 38, 98, 128, 128);
             newEnemy.bDisPlayCollision = false;
@@ -158,22 +166,23 @@ function EventTick() {
         }
         if (EachSecondsFromStart(Math.trunc(Math.random() * 10))) {
             const randomPos2 = Math.trunc(Math.random() * 300);
-            const newGround = new Ground(CANVAS, 100 + Math.trunc(Math.random() * 100), 10, 1000 + randomPos2, 600, "orange")
+            const newGround = new Ground(CANVAS, 100 + Math.trunc(Math.random() * 100), 10, 1000 + randomPos2, 600, "orange", (3 + Math.trunc(Math.random() * 2)));
             GroundList.push(newGround);
         }
         EnemiesList.forEach((element, index) => {
-            element.xLocation -= (5 + Math.trunc(Math.random() * 5));
+            element.xLocation -= element.moveSpeed;
             element.UpdateAnimation(gameFrame, staggerFrames, 6);
             element.Update();
             if (element.CheckCollision(gameCharacter)) {
                 bLoseTheGame = true;
+                bgm.Stop();
             }
             if (element.xLocation < -100) {
                 EnemiesList.shift();
             }
         });
         GroundList.forEach(element => {
-            element.xLocation -= (3 + Math.trunc(Math.random() * 2));
+            element.xLocation -= element.moveSpeed;
             element.CheckCollision(gameCharacter)
             element.Update();
 
@@ -191,8 +200,6 @@ function EventTick() {
     }
 }
 
-BeginPlay();
-
 function ResetGame() {
     if (bLoseTheGame) {
         CONTEXT.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -202,6 +209,7 @@ function ResetGame() {
         gameCharacter.yLocation = 696;
         totalScore = gameFrame = 0;
         bLoseTheGame = false;
+        bgm.Play();
         EventTick();
     }
 

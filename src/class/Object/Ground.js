@@ -1,10 +1,11 @@
-import {Actor} from "../Actor/Actor.js";
-import {Character} from "../Character/Character.js";
+import { Actor } from "../Actor/Actor.js";
+import { Character } from "../Character/Character.js";
 
 export class Ground extends Actor {
 
-    constructor(canvas, width, height, xLocation, yLocation, color) {
+    constructor(canvas, width, height, xLocation, yLocation, color, moveSpeed) {
         super(canvas, width, height, xLocation, yLocation, color);
+        this.moveSpeed = moveSpeed;
     }
 
     CheckCollision(otherActor) {
