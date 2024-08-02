@@ -46,7 +46,7 @@ const SPRITE_Y_DIFF = 50;
 let gameFrame = 0;
 const staggerFrames = 5;
 const playerSprite = new Image();
-playerSprite.src = '../assets/images/tiny_cat/kitty.png';
+playerSprite.src = './assets/images/tiny_cat/kitty.png';
 
 const CharacterAnimationStateList = [{ name: 'idle_right', frames: 8 }, {
     name: 'walk_right',
@@ -56,7 +56,7 @@ const CharacterAnimationStateList = [{ name: 'idle_right', frames: 8 }, {
 let AnimationStateIndex = 0;
 
 const enemySprite = new Image();
-enemySprite.src = '../assets/images/enemy/Blue_Slime/Run.png'
+enemySprite.src = './assets/images/enemy/Blue_Slime/Run.png'
 // Background Parallax
 const BACKGROUND_IMAGE_WIDTH = 288;
 const BACKGROUND_IMAGE_HEIGHT = 208;
@@ -67,12 +67,12 @@ const backgroundImage3 = new Image();
 const backgroundImage4 = new Image();
 const backgroundImage5 = new Image();
 const backgroundImage6 = new Image();
-backgroundImage1.src = '../assets/images/background/1 - Leaf_top.png'
-backgroundImage2.src = '../assets/images/background/2 - Trees.png'
-backgroundImage3.src = '../assets/images/background/3 - Bottom_leaf_piles.png'
-backgroundImage4.src = '../assets/images/background/4 - Tree_row_BG_1.png'
-backgroundImage5.src = '../assets/images/background/5 - Tree_row_BG_2.png'
-backgroundImage6.src = '../assets/images/background/6 - Distant_trees.png'
+backgroundImage1.src = './assets/images/background/1 - Leaf_top.png'
+backgroundImage2.src = './assets/images/background/2 - Trees.png'
+backgroundImage3.src = './assets/images/background/3 - Bottom_leaf_piles.png'
+backgroundImage4.src = './assets/images/background/4 - Tree_row_BG_1.png'
+backgroundImage5.src = './assets/images/background/5 - Tree_row_BG_2.png'
+backgroundImage6.src = './assets/images/background/6 - Distant_trees.png'
 const bgWidth = BACKGROUND_IMAGE_WIDTH * BACKGROUND_IMAGE_SCALE;
 const bgHeight = BACKGROUND_IMAGE_HEIGHT * BACKGROUND_IMAGE_SCALE;
 const ParallaxBackgroundLayer1 = new BackgroundParallax(CANVAS, bgWidth, bgHeight, 0, 0, backgroundImage1);
@@ -108,7 +108,7 @@ function BeginPlay() {
     gameCharacter.bEnableGravity = true;
     gameCharacter.HeightDiff = 22;
     gameCharacter.bDisPlayCollision = false;
-    const bgm = new Sound('../assets/sounds/bgm.mp3', true);
+    const bgm = new Sound('./assets/sounds/bgm.mp3', true);
     // bgm.Play();
     scoreText = new Text(CANVAS, 0, 0, 100, 100, " blue", "Consolas", "60px");
     EventTick();
