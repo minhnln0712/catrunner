@@ -4,6 +4,7 @@ export class Enemy extends Actor {
     constructor(canvas, width, height, xLocation, yLocation, moveSpeed) {
         super(canvas, width, height, xLocation, yLocation)
         this.moveSpeed = moveSpeed;
+        this.passCharacter = false;
     }
 
     InitAnimation(enemySprite, spriteWidth, spriteHeight, spriteXDiff, spriteYDiff, imageWidth, imageHeight) {

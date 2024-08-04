@@ -28,6 +28,7 @@ const CHARACTER_JUMP_FORCE = 8;
 const CHARACTER_MOVE_SPEED = 2;
 
 let gameCharacter;
+let characterHP = 3;
 let KeyInputList = []
 
 window.addEventListener("keydown", function (e) {
@@ -98,11 +99,10 @@ let ParallaxBackgroundLayers = [{
 
 let EnemiesList = [];
 
+let mainGround;
 let GroundList = [];
 
 let ItemList = [];
-
-// let testGround;
 
 let totalScore = 0;
 let scoreText;
@@ -110,11 +110,78 @@ let scoreText;
 const bgm = new Sound('assets/sounds/bgm.mp3', true);
 
 document.getElementById("startBtn").addEventListener("click", () => {
-    document.getElementById("startBtn").style.display = "none";
-    bgm.Play();
-    BeginPlay();
+    document.getElementById("startBtn").classList.toggle("inactive-button");
+    document.getElementById('startMenu').classList.toggle('inactive-menu');
+    document.getElementById("closeHelpBtn").classList.toggle("inactive-button");
+    document.getElementById('helpMenu').classList.toggle('inactive-menu');
+    currentGameState = GameState.InHelpMenu;
 })
 
+document.getElementById("closeHelpBtn").addEventListener("click", () => {
+    document.getElementById("closeHelpBtn").classList.toggle("inactive-button");
+    document.getElementById('helpMenu').classList.toggle('inactive-menu');
+    document.getElementById("pauseBtn").classList.toggle("inactive-button");
+    document.getElementById("openHelpBtn").classList.toggle("inactive-button");
+    document.getElementById('inGameMenu').classList.toggle('inactive-menu');
+    bgm.Play();
+    currentGameState = GameState.InGame;
+})
+
+document.getElementById("openHelpBtn").addEventListener("click", () => {
+    document.getElementById("openHelpBtn").classList.toggle("inactive-button");
+    document.getElementById("pauseBtn").classList.toggle("inactive-button");
+    document.getElementById('inGameMenu').classList.toggle('inactive-menu');
+    document.getElementById("closeHelpBtn").classList.toggle("inactive-button");
+    document.getElementById('helpMenu').classList.toggle('inactive-menu');
+    bgm.Pause();
+    currentGameState = GameState.InHelpMenu;
+})
+
+document.getElementById("pauseBtn").addEventListener("click", () => {
+    document.getElementById("pauseBtn").classList.toggle("inactive-button");
+    document.getElementById("openHelpBtn").classList.toggle("inactive-button");
+    document.getElementById('inGameMenu').classList.toggle('inactive-menu');
+    document.getElementById('continueBtn').classList.toggle('inactive-button');
+    document.getElementById('restartPauseBtn').classList.toggle('inactive-button');
+    document.getElementById("pauseMenu").classList.toggle("inactive-menu");
+    bgm.Pause();
+    currentGameState = GameState.InPauseMenu;
+})
+document.getElementById("muteBtn").addEventListener("click", () => {
+    bgm.ToggleMute();
+})
+
+document.getElementById("continueBtn").addEventListener("click", () => {
+    document.getElementById("continueBtn").classList.toggle("inactive-button");
+    document.getElementById("restartPauseBtn").classList.toggle("inactive-button");
+    document.getElementById('pauseMenu').classList.toggle('inactive-menu');
+    document.getElementById("pauseBtn").classList.toggle("inactive-button");
+    document.getElementById("openHelpBtn").classList.toggle("inactive-button");
+    document.getElementById('inGameMenu').classList.toggle('inactive-menu');
+    bgm.Play();
+    currentGameState = GameState.InGame;
+})
+
+document.getElementById("restartPauseBtn").addEventListener("click", () => {
+    document.getElementById("continueBtn").classList.toggle("inactive-button");
+    document.getElementById("restartPauseBtn").classList.toggle("inactive-button");
+    document.getElementById('pauseMenu').classList.toggle('inactive-menu');
+    document.getElementById("pauseBtn").classList.toggle("inactive-button");
+    document.getElementById("openHelpBtn").classList.toggle("inactive-button");
+    document.getElementById('inGameMenu').classList.toggle('inactive-menu');
+    ResetGame();
+})
+
+document.getElementById("restartBtn").addEventListener("click", () => {
+    document.getElementById("restartBtn").classList.toggle("inactive-button");
+    document.getElementById('gameOverMenu').classList.toggle('inactive-menu');
+    document.getElementById("pauseBtn").classList.toggle("inactive-button");
+    document.getElementById("openHelpBtn").classList.toggle("inactive-button");
+    document.getElementById('inGameMenu').classList.toggle('inactive-menu');
+    ResetGame();
+})
+
+BeginPlay();
 
 function BeginPlay() {
     gameCharacter = new Character(CANVAS, 32, 32, 30, 696);
@@ -122,6 +189,8 @@ function BeginPlay() {
     gameCharacter.bEnableGravity = true;
     gameCharacter.HeightDiff = 22;
     gameCharacter.bDisPlayCollision = false;
+    mainGround = new Ground(CANVAS, 1000, 10, 0, 730, "black", 0);
+    mainGround.bDisPlayCollision = false;
     scoreText = new Text(CANVAS, 0, 0, 100, 100, " blue", "Consolas", "60px");
     EventTick();
 }
@@ -132,7 +201,7 @@ function EachSecondsFromStart(seconds) {
 
 function EventTick() {
     requestAnimationFrame(EventTick);
-    if (currentGameState !== GameState.InPauseMenu && currentGameState !== GameState.InGameOverMenu) {
+    if (currentGameState !== GameState.InPauseMenu && currentGameState !== GameState.InGameOverMenu && currentGameState !== GameState.InHelpMenu) {
         gameFrame++;
         CONTEXT.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         ParallaxBackgroundLayers.forEach(element => {
@@ -164,6 +233,8 @@ function EventTick() {
             gameCharacter.UpdateAnimation(gameFrame, staggerFrames, CharacterAnimationStateList[gameCharacter.animationIndex].frames);
             gameCharacter.ApplyGravity();
             gameCharacter.Update();
+            mainGround.Update();
+            mainGround.CheckCollision(gameCharacter);
             if (EachSecondsFromStart(Math.trunc(Math.random() * 3))) {
                 const randomPos = Math.trunc(Math.random() * 200);
                 const newEnemy = new Enemy(CANVAS, 40, 30, 1000 + randomPos, 698, (5 + Math.trunc(Math.random() * 5)));
@@ -177,28 +248,48 @@ function EventTick() {
                 const newGround = new Ground(CANVAS, 100 + Math.trunc(Math.random() * 100), 10, 1000 + randomPos2, 600, "orange", (3 + Math.trunc(Math.random() * 2)));
                 GroundList.push(newGround);
             }
-            EnemiesList.forEach((element, index) => {
-                element.xLocation -= element.moveSpeed;
-                element.UpdateAnimation(gameFrame, staggerFrames, 6);
-                element.Update();
-                if (element.CheckCollision(gameCharacter)) {
-                    currentGameState = GameState.InGameOverMenu;
-                    bgm.Stop();
+            EnemiesList.forEach((enemy, index) => {
+                enemy.xLocation -= enemy.moveSpeed;
+                enemy.UpdateAnimation(gameFrame, staggerFrames, 6);
+                enemy.Update();
+                if (enemy.CheckCollision(gameCharacter)) {
+                    if (!gameCharacter.bIsOnTheGround &&
+                        enemy.yLocation >= gameCharacter.yLocation &&
+                        enemy.xLocation - enemy.spriteXDiff <= gameCharacter.xLocation) {
+                        totalScore += 5;
+                        EnemiesList.splice(EnemiesList.indexOf(enemy), 1);
+                    } else {
+                        console.log(characterHP);
+                        if (characterHP > 0) {
+                            characterHP--;
+                            EnemiesList.splice(EnemiesList.indexOf(enemy), 1);
+                        } else {
+                            currentGameState = GameState.InGameOverMenu;
+                            document.getElementById("restartBtn").classList.toggle("inactive-button");
+                            document.getElementById('gameOverMenu').classList.toggle('inactive-menu');
+                            document.getElementById("pauseBtn").classList.toggle("inactive-button");
+                            document.getElementById("openHelpBtn").classList.toggle("inactive-button");
+                            document.getElementById('inGameMenu').classList.toggle('inactive-menu');
+                            bgm.Pause();
+                        }
+                    }
                 }
-                if (element.xLocation < -100) {
+                if (enemy.xLocation <= gameCharacter.xLocation && !enemy.passCharacter) {
+                    enemy.passCharacter = true;
+                    totalScore += 1;
+                }
+                if (enemy.xLocation < -100) {
                     EnemiesList.shift();
                 }
             });
-            GroundList.forEach(element => {
-                element.xLocation -= element.moveSpeed;
-                element.CheckCollision(gameCharacter)
-                element.Update();
-
-                if (element.xLocation < -500) {
+            GroundList.forEach(ground => {
+                ground.xLocation -= ground.moveSpeed;
+                ground.CheckCollision(gameCharacter);
+                ground.Update();
+                if (ground.xLocation < -500) {
                     GroundList.shift();
                 }
             })
-            totalScore = gameFrame;
             scoreText.textContent = "Score: " + totalScore;
             scoreText.Update();
         }
@@ -209,16 +300,15 @@ function EventTick() {
 }
 
 function ResetGame() {
-    if (bLoseTheGame) {
-        CONTEXT.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        EnemiesList = [];
-        GroundList = [];
-        gameCharacter.xLocation = 30;
-        gameCharacter.yLocation = 696;
-        totalScore = gameFrame = 0;
-        bLoseTheGame = false;
-        bgm.Play();
-        EventTick();
-    }
-
+    CONTEXT.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    EnemiesList = [];
+    GroundList = [];
+    ItemList = [];
+    gameCharacter.xLocation = 30;
+    gameCharacter.yLocation = 696;
+    totalScore = gameFrame = 0;
+    characterHP = 3;
+    bgm.Restart();
+    bgm.Play();
+    currentGameState = GameState.InGame;
 }

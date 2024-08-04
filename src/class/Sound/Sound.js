@@ -15,7 +15,15 @@ export class Sound {
         });
     }
 
-    Stop() {
+    Pause() {
         this.sound.pause();
+    }
+
+    ToggleMute() {
+        this.sound.volume = this.sound.volume === 0 ? 1 : 0;
+    }
+
+    Restart() {
+        this.sound.currentTime = 0
     }
 }

@@ -1,4 +1,4 @@
-import {Actor} from "../Actor/Actor.js"
+import { Actor } from "../Actor/Actor.js"
 
 export class Character extends Actor {
     constructor(canvas, width, height, xLocation, yLocation) {
@@ -11,8 +11,6 @@ export class Character extends Actor {
         this.bIsOnTheGround = false;
         this.bBeginInteraction = false;
         this.animationIndex = 0;
-        // TODO: Delete later
-        this.HeightDiff = 0;
     }
 
     InitAnimation(characterSprite, spriteWidth, spriteHeight, spriteXDiff, spriteYDiff, imageWidth, imageHeight) {
@@ -75,7 +73,7 @@ export class Character extends Actor {
             this.gravitySpeed += this.gravityValue;
             this.yLocation += this.velocityY + this.gravitySpeed;
             this.bIsOnTheGround = false;
-            let theGround = this.canvas.height - this.height - this.spriteYDiff - this.HeightDiff;
+            let theGround = this.canvas.height - this.height - this.spriteYDiff;
             this.CheckGround(theGround);
         }
     };

@@ -1,3 +1,8 @@
+p {
+  text-align: center;
+  margin: 0;
+}
+
 #gameScreen {
   border: 10px solid black;
   position: absolute;
@@ -6,6 +11,19 @@
   transform: translate(-50%, -50%);
   width: 1000px;
   height: 800px;
+  z-index: -1;
+}
+
+#helpMenu {
+  background-color: rgb(255, 174, 0);
+}
+
+#pauseMenu {
+  background-color: rgb(141, 141, 141);
+}
+
+#gameOverMenu {
+  background-color: rgb(255, 0, 0);
 }
 
 .menu {
@@ -15,10 +33,6 @@
   transform: translate(-50%, -50%);
   width: 1000px;
   height: 800px;
-}
-
-.active-menu {
-  display: block;
 }
 
 .inactive-menu {
@@ -34,24 +48,37 @@
   height: 100px;
 }
 
-.active-button {
-  z-index: 999;
+#closeHelpBtn {
+  float: right;
+  width: 50px;
+  height: 50px;
+}
+#openHelpBtn {
+  float: right;
+  width: 50px;
+  height: 50px;
+}
+#pauseBtn {
+  float: right;
+  width: 50px;
+  height: 50px;
 }
 
 .inactive-button {
-  z-index: -1;
+  display: none;
 }
 
 /* CSS */
 .button-53 {
+  z-index: 999;
   background-color: #e64a07;
   border: 0 solid #e5e7eb;
   box-sizing: border-box;
   color: #ffffff;
   display: flex;
-  font-family: ui-sans-serif, system-ui, -apple-system, system-ui, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-family: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   font-size: 1rem;
   font-weight: 700;
   justify-content: center;
@@ -63,7 +90,6 @@
   text-decoration-thickness: auto;
   width: 100%;
   max-width: 460px;
-  position: relative;
   cursor: pointer;
   transform: rotate(-2deg);
   user-select: none;
