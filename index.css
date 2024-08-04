@@ -8,18 +8,21 @@
   height: 800px;
 }
 
-#mainMenu {
-  background-image: url(./assets/images/background/cat\ background.jpg);
-  background-position: center;
-  background-position-y: 25%;
-  background-size: 50%;
-  background-repeat: no-repeat;
+.menu {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 1000px;
   height: 800px;
+}
+
+.active-menu {
+  display: block;
+}
+
+.inactive-menu {
+  display: none;
 }
 
 #startBtn {
@@ -29,7 +32,14 @@
   transform: translate(-50%, -50%);
   width: 300px;
   height: 100px;
-  z-index: 9999;
+}
+
+.active-button {
+  z-index: 999;
+}
+
+.inactive-button {
+  z-index: -1;
 }
 
 /* CSS */

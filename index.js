@@ -7,6 +7,16 @@ import { Ground } from "./src/class/Object/Ground.js";
 import { Enemy } from "./src/class/Character/Enemy.js";
 import { Text } from "./src/class/Text/Text.js";
 
+const GameState = Object.freeze({
+    InStartMenu: 0,
+    InHelpMenu: 1,
+    InGame: 2,
+    InPauseMenu: 3,
+    InGameOverMenu: 4
+})
+
+let currentGameState = GameState.InStartMenu;
+
 const CANVAS = document.getElementById("gameScreen");
 const CONTEXT = CANVAS.getContext("2d");
 const CANVAS_WIDTH = CANVAS.width = 1000;
@@ -18,8 +28,6 @@ const CHARACTER_JUMP_FORCE = 8;
 const CHARACTER_MOVE_SPEED = 2;
 
 let gameCharacter;
-let bLoseTheGame = false;
-
 let KeyInputList = []
 
 window.addEventListener("keydown", function (e) {
@@ -32,8 +40,6 @@ window.addEventListener("keyup", function (e) {
     const keyIndex = KeyInputList.indexOf(e.key);
     if (keyIndex !== -1) KeyInputList.splice(keyIndex, 1);
 });
-
-let testEnemy;
 
 const IMAGE_SCALE = 3;
 const IMAGE_WIDTH = 256 / IMAGE_SCALE;
@@ -94,7 +100,7 @@ let EnemiesList = [];
 
 let GroundList = [];
 
-let BuffItemList = [];
+let ItemList = [];
 
 // let testGround;
 
@@ -105,7 +111,6 @@ const bgm = new Sound('assets/sounds/bgm.mp3', true);
 
 document.getElementById("startBtn").addEventListener("click", () => {
     document.getElementById("startBtn").style.display = "none";
-    document.getElementById("mainMenu").style.display = "none";
     bgm.Play();
     BeginPlay();
 })
@@ -117,7 +122,6 @@ function BeginPlay() {
     gameCharacter.bEnableGravity = true;
     gameCharacter.HeightDiff = 22;
     gameCharacter.bDisPlayCollision = false;
-
     scoreText = new Text(CANVAS, 0, 0, 100, 100, " blue", "Consolas", "60px");
     EventTick();
 }
@@ -127,76 +131,80 @@ function EachSecondsFromStart(seconds) {
 }
 
 function EventTick() {
-    if (!bLoseTheGame) {
-        gameCharacter.StopMovement();
-        if (KeyInputList) {
-            gameCharacter.MoveRight(-CHARACTER_MOVE_SPEED / 2);
-            if (KeyInputList.indexOf("a") !== -1) gameCharacter.MoveRight(-CHARACTER_MOVE_SPEED);
-            if (KeyInputList.indexOf("d") !== -1) gameCharacter.MoveRight(CHARACTER_MOVE_SPEED);
-            if (gameCharacter.bIsOnTheGround) {
-                if (KeyInputList.indexOf(" ") !== -1) {
-                    gameCharacter.Jump(CHARACTER_JUMP_FORCE);
-                    gameCharacter.bIsOnTheGround = false;
-                }
-                gameCharacter.animationIndex = 1;
-            } else {
-                gameCharacter.GravityDown(gameCharacter.bIsOnTheGround ? 0 : BASE_GRAVITY_VALUE);
-                gameCharacter.animationIndex = gameCharacter.gravitySpeed < 0 ? 2 : 3;
-            }
-        }
-
+    requestAnimationFrame(EventTick);
+    if (currentGameState !== GameState.InPauseMenu && currentGameState !== GameState.InGameOverMenu) {
         gameFrame++;
         CONTEXT.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         ParallaxBackgroundLayers.forEach(element => {
             element.layer.UpdateNewPosition(element.speedX, element.speedY);
             element.layer.Update();
         });
-        gameCharacter.UpdateNewPosition();
-        gameCharacter.UpdateAnimation(gameFrame, staggerFrames, CharacterAnimationStateList[gameCharacter.animationIndex].frames);
-        gameCharacter.ApplyGravity();
-        gameCharacter.Update();
 
-        if (EachSecondsFromStart(Math.trunc(Math.random() * 3))) {
-            const randomPos = Math.trunc(Math.random() * 200);
-            const newEnemy = new Enemy(CANVAS, 40, 30, 1000 + randomPos, 698, (5 + Math.trunc(Math.random() * 5)));
-            newEnemy.animationIndex = 0;
-            newEnemy.InitAnimation(enemySprite, 128, 128, 38, 98, 128, 128);
-            newEnemy.bDisPlayCollision = false;
-            EnemiesList.push(newEnemy);
-        }
-        if (EachSecondsFromStart(Math.trunc(Math.random() * 10))) {
-            const randomPos2 = Math.trunc(Math.random() * 300);
-            const newGround = new Ground(CANVAS, 100 + Math.trunc(Math.random() * 100), 10, 1000 + randomPos2, 600, "orange", (3 + Math.trunc(Math.random() * 2)));
-            GroundList.push(newGround);
-        }
-        EnemiesList.forEach((element, index) => {
-            element.xLocation -= element.moveSpeed;
-            element.UpdateAnimation(gameFrame, staggerFrames, 6);
-            element.Update();
-            if (element.CheckCollision(gameCharacter)) {
-                bLoseTheGame = true;
-                bgm.Stop();
+        if (currentGameState === GameState.InGame) {
+            // Movement Handle
+            gameCharacter.StopMovement();
+            if (KeyInputList) {
+                gameCharacter.MoveRight(-CHARACTER_MOVE_SPEED / 2);
+                if (KeyInputList.indexOf("a") !== -1) gameCharacter.MoveRight(-CHARACTER_MOVE_SPEED);
+                if (KeyInputList.indexOf("d") !== -1) gameCharacter.MoveRight(CHARACTER_MOVE_SPEED);
+                if (gameCharacter.bIsOnTheGround) {
+                    if (KeyInputList.indexOf(" ") !== -1) {
+                        gameCharacter.Jump(CHARACTER_JUMP_FORCE);
+                        gameCharacter.bIsOnTheGround = false;
+                    }
+                    gameCharacter.animationIndex = 1;
+                } else {
+                    gameCharacter.GravityDown(gameCharacter.bIsOnTheGround ? 0 : BASE_GRAVITY_VALUE);
+                    gameCharacter.animationIndex = gameCharacter.gravitySpeed < 0 ? 2 : 3;
+                }
             }
-            if (element.xLocation < -100) {
-                EnemiesList.shift();
-            }
-        });
-        GroundList.forEach(element => {
-            element.xLocation -= element.moveSpeed;
-            element.CheckCollision(gameCharacter)
-            element.Update();
 
-            if (element.xLocation < -500) {
-                GroundList.shift();
+            // Animation and Interaction Handle
+            gameCharacter.UpdateNewPosition();
+            gameCharacter.UpdateAnimation(gameFrame, staggerFrames, CharacterAnimationStateList[gameCharacter.animationIndex].frames);
+            gameCharacter.ApplyGravity();
+            gameCharacter.Update();
+            if (EachSecondsFromStart(Math.trunc(Math.random() * 3))) {
+                const randomPos = Math.trunc(Math.random() * 200);
+                const newEnemy = new Enemy(CANVAS, 40, 30, 1000 + randomPos, 698, (5 + Math.trunc(Math.random() * 5)));
+                newEnemy.animationIndex = 0;
+                newEnemy.InitAnimation(enemySprite, 128, 128, 38, 98, 128, 128);
+                newEnemy.bDisPlayCollision = false;
+                EnemiesList.push(newEnemy);
             }
-        })
+            if (EachSecondsFromStart(Math.trunc(Math.random() * 10))) {
+                const randomPos2 = Math.trunc(Math.random() * 300);
+                const newGround = new Ground(CANVAS, 100 + Math.trunc(Math.random() * 100), 10, 1000 + randomPos2, 600, "orange", (3 + Math.trunc(Math.random() * 2)));
+                GroundList.push(newGround);
+            }
+            EnemiesList.forEach((element, index) => {
+                element.xLocation -= element.moveSpeed;
+                element.UpdateAnimation(gameFrame, staggerFrames, 6);
+                element.Update();
+                if (element.CheckCollision(gameCharacter)) {
+                    currentGameState = GameState.InGameOverMenu;
+                    bgm.Stop();
+                }
+                if (element.xLocation < -100) {
+                    EnemiesList.shift();
+                }
+            });
+            GroundList.forEach(element => {
+                element.xLocation -= element.moveSpeed;
+                element.CheckCollision(gameCharacter)
+                element.Update();
+
+                if (element.xLocation < -500) {
+                    GroundList.shift();
+                }
+            })
+            totalScore = gameFrame;
+            scoreText.textContent = "Score: " + totalScore;
+            scoreText.Update();
+        }
+
         ParallaxBackgroundLayer2.UpdateNewPosition(2, 0);
         ParallaxBackgroundLayer2.Update();
-        totalScore = gameFrame;
-        scoreText.textContent = "Score: " + totalScore;
-        scoreText.Update();
-        // * Important: This code need always to be the last line of this function
-        requestAnimationFrame(EventTick);
     }
 }
 

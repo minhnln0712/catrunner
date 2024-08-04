@@ -7,10 +7,24 @@
     <title>Cat Runner</title>
   </head>
   <body>
-    <button id="startBtn" class="button-53">
-      Sprint Through Slime and Shine!
-    </button>
-    <div id="mainMenu"></div>
+    <div id="startMenu" class="menu active-menu">
+      <button id="startBtn" class="active-button btn button-53">
+        Sprint Through Slime and Shine!
+      </button>
+    </div>
+    <div id="helpMenu" class="menu inactive-menu">
+      <button id="restartBtn" class="button-53">Restart</button>
+    </div>
+    <div id="inGameMenu" class="menu inactive-menu">
+      <button id="pauseBtn" class="button-53">Restart</button>
+      <button id="helpBtn" class="button-53">Restart</button>
+    </div>
+    <div id="pauseMenu" class="menu inactive-menu">
+      <button id="continueBtn" class="button-53">Restart</button>
+    </div>
+    <div id="gameOverMenu" class="menu inactive-menu">
+      <button id="restartBtn" class="button-53">Restart</button>
+    </div>
     <canvas id="gameScreen"></canvas>
     <script src="./index.js" type="module"></script>
   </body>
