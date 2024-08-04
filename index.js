@@ -6,6 +6,7 @@ import { Sound } from "./src/class/Sound/Sound.js";
 import { Ground } from "./src/class/Object/Ground.js";
 import { Enemy } from "./src/class/Character/Enemy.js";
 import { Text } from "./src/class/Text/Text.js";
+import { Item } from "./src/class/Object/Item.js";
 
 const GameState = Object.freeze({
     InStartMenu: 0,
@@ -106,8 +107,10 @@ let ItemList = [];
 
 let totalScore = 0;
 let scoreText;
+let hpText;
 
 const bgm = new Sound('assets/sounds/bgm.mp3', true);
+const gameoverSFX = new Sound('/assets/sounds/gameover.mp3', false)
 
 document.getElementById("startBtn").addEventListener("click", () => {
     document.getElementById("startBtn").classList.toggle("inactive-button");
@@ -181,6 +184,10 @@ document.getElementById("restartBtn").addEventListener("click", () => {
     ResetGame();
 })
 
+let testItem;
+const itemSprite = new Image();
+itemSprite.src = 'assets/images/catfood.png';
+
 BeginPlay();
 
 function BeginPlay() {
@@ -191,7 +198,8 @@ function BeginPlay() {
     gameCharacter.bDisPlayCollision = false;
     mainGround = new Ground(CANVAS, 1000, 10, 0, 730, "black", 0);
     mainGround.bDisPlayCollision = false;
-    scoreText = new Text(CANVAS, 0, 0, 100, 100, " blue", "Consolas", "60px");
+    scoreText = new Text(CANVAS, 0, 0, 100, 100, "white", "Consolas", "60px");
+    hpText = new Text(CANVAS, 0, 0, 100, 200, "red", "Consolas", "60px");
     EventTick();
 }
 
@@ -236,16 +244,26 @@ function EventTick() {
             mainGround.Update();
             mainGround.CheckCollision(gameCharacter);
             if (EachSecondsFromStart(Math.trunc(Math.random() * 3))) {
-                const randomPos = Math.trunc(Math.random() * 200);
-                const newEnemy = new Enemy(CANVAS, 40, 30, 1000 + randomPos, 698, (5 + Math.trunc(Math.random() * 5)));
+                const newEnemy = new Enemy(CANVAS, 40, 30,
+                    1000 + Math.trunc(Math.random() * 200),
+                    698, (5 + Math.trunc(Math.random() * 5)));
                 newEnemy.animationIndex = 0;
                 newEnemy.InitAnimation(enemySprite, 128, 128, 38, 98, 128, 128);
                 newEnemy.bDisPlayCollision = false;
                 EnemiesList.push(newEnemy);
             }
+            if (EachSecondsFromStart(Math.trunc(Math.random() * 5))) {
+                const newItem = new Item(CANVAS, 80, 80,
+                    1000 + Math.trunc(Math.random() * 200),
+                    350 + Math.trunc(Math.random() * 300),
+                    (2 + Math.trunc(Math.random() * 2)));
+                newItem.InitAnimation(itemSprite);
+                ItemList.push(newItem);
+            }
             if (EachSecondsFromStart(Math.trunc(Math.random() * 10))) {
-                const randomPos2 = Math.trunc(Math.random() * 300);
-                const newGround = new Ground(CANVAS, 100 + Math.trunc(Math.random() * 100), 10, 1000 + randomPos2, 600, "orange", (3 + Math.trunc(Math.random() * 2)));
+                const newGround = new Ground(CANVAS, 100 + Math.trunc(Math.random() * 100), 10,
+                    1000 + Math.trunc(Math.random() * 300), 600,
+                    "orange", (3 + Math.trunc(Math.random() * 2)));
                 GroundList.push(newGround);
             }
             EnemiesList.forEach((enemy, index) => {
@@ -259,9 +277,8 @@ function EventTick() {
                         totalScore += 5;
                         EnemiesList.splice(EnemiesList.indexOf(enemy), 1);
                     } else {
-                        console.log(characterHP);
+                        characterHP--;
                         if (characterHP > 0) {
-                            characterHP--;
                             EnemiesList.splice(EnemiesList.indexOf(enemy), 1);
                         } else {
                             currentGameState = GameState.InGameOverMenu;
@@ -271,6 +288,7 @@ function EventTick() {
                             document.getElementById("openHelpBtn").classList.toggle("inactive-button");
                             document.getElementById('inGameMenu').classList.toggle('inactive-menu');
                             bgm.Pause();
+                            gameoverSFX.Play();
                         }
                     }
                 }
@@ -290,12 +308,32 @@ function EventTick() {
                     GroundList.shift();
                 }
             })
-            scoreText.textContent = "Score: " + totalScore;
-            scoreText.Update();
+            ItemList.forEach(item => {
+                item.xLocation -= item.moveSpeed;
+                if (item.CheckCollision(gameCharacter)) {
+                    totalScore += 10;
+                    ItemList.splice(ItemList.indexOf(item), 1);
+                }
+                item.UpdateAnimation();
+                item.Update();
+                if (item.xLocation < -100) {
+                    ItemList.shift();
+                }
+            })
         }
 
         ParallaxBackgroundLayer2.UpdateNewPosition(2, 0);
         ParallaxBackgroundLayer2.Update();
+        if (currentGameState === GameState.InGame) {
+            let hpTextTemp = '';
+            for (let i = 0; i < characterHP; i++) {
+                hpTextTemp += '❤ ';
+            }
+            hpText.textContent = hpTextTemp;
+            hpText.Update();
+            scoreText.textContent = "Score: " + totalScore;
+            scoreText.Update();
+        }
     }
 }
 
@@ -308,6 +346,8 @@ function ResetGame() {
     gameCharacter.yLocation = 696;
     totalScore = gameFrame = 0;
     characterHP = 3;
+    gameoverSFX.Pause();
+    gameoverSFX.Restart();
     bgm.Restart();
     bgm.Play();
     currentGameState = GameState.InGame;

@@ -14,8 +14,14 @@ p {
   z-index: -1;
 }
 
+#startMenu {
+  background-image: url(/assets/images/mainmenulogo.png);
+  background-repeat: no-repeat;
+  background-position: 50% 10%;
+}
+
 #helpMenu {
-  background-color: rgb(255, 174, 0);
+  background-image: url(/assets/images/helpbackground.png);
 }
 
 #pauseMenu {
@@ -23,7 +29,7 @@ p {
 }
 
 #gameOverMenu {
-  background-color: rgb(255, 0, 0);
+  background-image: url(/assets/images/gameoverBG.png);
 }
 
 .menu {
@@ -39,7 +45,10 @@ p {
   display: none;
 }
 
-#startBtn {
+#startBtn,
+#restartBtn,
+#continueBtn,
+#restartPauseBtn {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -47,18 +56,20 @@ p {
   width: 300px;
   height: 100px;
 }
+#restartPauseBtn {
+  top: 40%;
+}
+#continueBtn {
+  top: 60%;
+}
+#restartBtn {
+  top: 70%;
+}
 
+#openHelpBtn,
+#muteBtn,
+#pauseBtn,
 #closeHelpBtn {
-  float: right;
-  width: 50px;
-  height: 50px;
-}
-#openHelpBtn {
-  float: right;
-  width: 50px;
-  height: 50px;
-}
-#pauseBtn {
   float: right;
   width: 50px;
   height: 50px;
